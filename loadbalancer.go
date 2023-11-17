@@ -7,6 +7,9 @@ import (
 	"sync"
 )
 
+//global variables
+var roundRobinIndex int //by default this is zero
+
 //store the backend server and it's reverse proxy object
 type Server struct {
 	url          string
@@ -23,13 +26,12 @@ type ServerPool struct {
 //we can later add type of load balancing in here
 type LoadBalancer struct {
 	serverPool ServerPool
+	balancerType string
 }
 
-//global variables
-var roundRobinIndex int //by default this is zero
 
 //method to create a reverseproxy for a given server
-func (sp *ServerPool) createReverseProxy(serverURL string) *httputil.ReverseProxy {
+func (lb *LoadBalancer) createReverseProxy(serverURL string) *httputil.ReverseProxy {
 	//extract origin from serverURL
 	origin, _ := url.Parse(serverURL)
 
@@ -46,13 +48,13 @@ func (sp *ServerPool) createReverseProxy(serverURL string) *httputil.ReverseProx
 	return reverseProxy
 }
 
-func (sp *ServerPool) addNewServer(serverURL string) {
+func (lb *LoadBalancer) addNewServer(serverURL string) {
 	server := &Server{
 		url:          serverURL,
-		ReverseProxy: sp.createReverseProxy(serverURL),
+		ReverseProxy: lb.createReverseProxy(serverURL),
 	}
 
-	sp.servers = append(sp.servers, server)
+	lb.serverPool.servers = append(lb.serverPool.servers, server)
 }
 
 //returns a server from the server pool in a round robin fashion
@@ -65,4 +67,15 @@ func (sp *ServerPool) getServerRoundRobin() *Server {
 	roundRobinIndex++
 
 	return server
+}
+
+
+func (lb *LoadBalancer) getServer() *Server {
+	if lb.balancerType == "round-robin" {
+		return lb.serverPool.getServerRoundRobin()
+	}
+
+	panic("balancer not found")
+	//currently returning round robin just to prevent errors
+	return lb.serverPool.getServerRoundRobin()
 }

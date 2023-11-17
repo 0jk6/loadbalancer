@@ -7,16 +7,16 @@ Example: refer to `main.go`
 ```
 func main() {
 	
-	lb := LoadBalancer{}
+	lb := LoadBalancer{balancerType: "round-robin"}
 
-	lb.serverPool.addNewServer("http://localhost:8080")
-	lb.serverPool.addNewServer("http://localhost:8081")
-	lb.serverPool.addNewServer("http://localhost:8082")
+	lb.addNewServer("http://localhost:8080")
+	lb.addNewServer("http://localhost:8081")
+	lb.addNewServer("http://localhost:8082")
 
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		//get a server from the serverpool and use it's ServeHTTP method to serve requests
-		server := lb.serverPool.getServerRoundRobin()
+		server := lb.getServer()
 		server.ReverseProxy.ServeHTTP(w, r)
 	})
 
