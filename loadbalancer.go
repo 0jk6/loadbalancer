@@ -19,6 +19,12 @@ type ServerPool struct {
 	mutex   sync.Mutex //for concurrent reads and writes from server pool
 }
 
+//create a load balancer struct to wrap the ServerPool
+//we can later add type of load balancing in here
+type LoadBalancer struct {
+	serverPool ServerPool
+}
+
 //global variables
 var roundRobinIndex int //by default this is zero
 
