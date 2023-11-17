@@ -1,10 +1,11 @@
-# loadbalancer
+package main
 
-Load balancer using ReverseProxy in Golang
+import (
+	"fmt"
+	"net/http"
+)
 
 
-Example: refer to `main.go`
-```
 func main() {
 	var serverPool ServerPool
 
@@ -21,9 +22,3 @@ func main() {
 	fmt.Println("Listening on port 3000.")
 	http.ListenAndServe(":3000", nil)
 }
-```
-
-and then run `go run main.go loadbalancer.go`
-
-
-Currently it sends the requests to all the servers using Round Robin algorithm
